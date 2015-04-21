@@ -108,11 +108,11 @@ class Perk:
                 # print("   {0}: {1}".format(special_traits[i[0]], i[2]))
 
         return
-
-perk_list = []
-for key, value in perks.items():
-    perk_list.append(Perk(key, value))
-
-perk_list.sort(key=lambda perk: perk.name)
-
-print(perk_list)
+#
+# perk_list = []
+# for key, value in perks.items():
+#     perk_list.append(Perk(key, value))
+#
+# perk_list.sort(key=lambda perk: perk.name)
+#
+# print(perk_list)
