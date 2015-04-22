@@ -30,6 +30,10 @@ perks = {
                                       'computer terminal.',
     }
 
+start_packages = {
+    "None": "vanilla character",
+    "Melee": "(20xp,S:3,E:3,Melee:A,Stealth:N,1[p:Ninja;p:Silent_Runner;p:Toughness])"
+}
 
 class Perk:
     # compile some regular experssions for determining perk requirements
@@ -51,9 +55,9 @@ class Perk:
     def __init__(self, name, description):
         self.original_name = name
         self.has_prerequisite = False
-        self.p_perks = []
-        self.p_skills = {}
         self.p_traits = {}
+        self.p_skills = {}
+        self.p_perks = []
         self.p_race = []
 
         if name.count('(') > 0:
