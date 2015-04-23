@@ -1,9 +1,9 @@
 {% extends "bootstrap/base.html" %}
-{% block title %}This is an example page{% endblock %}
+{% block title %}Dead Zealand{% endblock %}
 
 {% block navbar %}
 <div class="navbar navbar-fixed-top">
-  <!-- ... -->
+    <!-- ... -->
 </div>
 {% endblock %}
 
@@ -19,6 +19,7 @@
                     <h1>
                         {{ sheet.character_name(placeholder='Character Name') }}<br>
                         <small>Scrounger</small>
+
                     </h1>
                 </div>
             </div>
@@ -26,13 +27,13 @@
         <div class="row">
             <div class="col-md-4">
                 <h3>Stats</h3>
-                    {{ sheet.strength(type="number", min="0", max="12")     }} {{ sheet.strength.label }}<br>
-                    {{ sheet.perception(type="number", min="0", max="12")   }} {{ sheet.perception.label }} <br>
-                    {{ sheet.endurance(type="number", min="0", max="12")    }} {{ sheet.endurance.label }} <br>
-                    {{ sheet.charisma(type="number", min="0", max="12")     }} {{ sheet.charisma.label }} <br>
-                    {{ sheet.intelligence(type="number", min="0", max="12") }} {{ sheet.intelligence.label }} <br>
-                    {{ sheet.agility(type="number", min="0", max="12")      }} {{ sheet.agility.label }} <br>
-                    {{ sheet.luck(type="number", min="0", max="12")         }} {{ sheet.luck.label }} <br>
+                {{ sheet.strength(type="number", min="0", max="12") }} {{ sheet.strength.label }}<br>
+                {{ sheet.perception(type="number", min="0", max="12") }} {{ sheet.perception.label }} <br>
+                {{ sheet.endurance(type="number", min="0", max="12") }} {{ sheet.endurance.label }} <br>
+                {{ sheet.charisma(type="number", min="0", max="12") }} {{ sheet.charisma.label }} <br>
+                {{ sheet.intelligence(type="number", min="0", max="12") }} {{ sheet.intelligence.label }} <br>
+                {{ sheet.agility(type="number", min="0", max="12") }} {{ sheet.agility.label }} <br>
+                {{ sheet.luck(type="number", min="0", max="12") }} {{ sheet.luck.label }} <br>
 
             </div>
             <div class="col-md-4">
@@ -53,30 +54,37 @@
                     </div>
                 </div>
 
-                    {% for item in traits.perk_list %}
-                    <div class="perk">
-                        <div class="trait_name"><em>{{ item }}</em></h3></div>
-                        <div class="trait_desc">{{ item.description }}</div>
-                        {% if item.has_prerequisite %}
-                        <div class="trait_prereq">
-                            <small><u>Prerequisites</u>
+                {% for item in traits.perk_list %}
+                <div class="perk">
+                    <div class="trait_name"><em>{{ item }}</em></h3></div>
+                    <div class="trait_desc">{{ item.description }}</div>
+                    {% if item.has_prerequisite %}
+                    <div class="trait_prereq">
+                        <small><u>Prerequisites</u>
                             {% for special_name, special_value in item.p_traits.items() %}
-                            <div class="trait_prereq_item"><span class="label label-success">Stat</span> {{ special_name }}: {{ special_value }}</div>
+                            <div class="trait_prereq_item"><span class="label label-success">Stat</span> {{ special_name
+                                }}: {{ special_value }}
+                            </div>
                             {% endfor %}
                             {% for skill_name, skill_rank in item.p_skills.items() %}
-                            <div class="trait_prereq_item"><span class="label label-success">Skill</span> {{ skill_name }}: {{ skill_rank }}</div>
+                            <div class="trait_prereq_item"><span class="label label-success">Skill</span> {{ skill_name
+                                }}: {{ skill_rank }}
+                            </div>
                             {% endfor %}
                             {% for perk_name in item.p_perks %}
-                            <div class="trait_prereq_item"><span class="label label-success">Perk</span> {{ perk_name }}</div>
+                            <div class="trait_prereq_item"><span class="label label-success">Perk</span> {{ perk_name }}
+                            </div>
                             {% endfor %}
-                        </small></div>
-                        {% endif %}
-                    </div><br>
-                    {% endfor %}<br>
+                        </small>
+                    </div>
+                    {% endif %}
                 </div>
+                <br>
+                {% endfor %}<br>
             </div>
+        </div>
 
-    <input type="submit" value="Go">
+        <input type="submit" value="Go">
+    </div>
 </form>
-</div>
 {% endblock %}

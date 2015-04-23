@@ -2,6 +2,11 @@ __author__ = 'Chris'
 
 import re
 
+
+symbols = {'+': 'Add',
+           '-': 'Costs',
+           '~': 'Requires'}
+
 special_traits = {'S': 'Strength',
                   'P': 'Perception',
                   'E': 'Endurance',
@@ -11,7 +16,8 @@ special_traits = {'S': 'Strength',
                   'L': 'Luck',
                   }
 
-skill_ranks = {'N': 'Novice',
+skill_ranks = {'-': 'Unskilled',
+               'N': 'Novice',
                'A': 'Adept',
                'E': 'Expert',
                }
@@ -28,12 +34,89 @@ perks = {
     'Comprehension(I:7)': 'Increases the discount when turning in skill books',
     'Computer_Whizz(I:4, Science:A)': 'Gives an additional attempt when trying to hack a locked down '
                                       'computer terminal.',
-    }
+}
 
 start_packages = {
-    "None": "vanilla character",
-    "Melee": "(20xp,S:3,E:3,Melee:A,Stealth:N,1[p:Ninja;p:Silent_Runner;p:Toughness])"
+    "!None!": "",
+    "Melee Combat": "(-xp:20,+S:3,+E:3,+Melee:A,+Stealth:N,[+p:Ninja;+p:Silent_Runner;+p:Toughness])",
+    "Ranged Combat": "(-xp:20,+P:3,+A:3,+Guns:A,+Explosives:N,[+p:Sniper;+p:Junk_Rounds;+p:Splash_Back])",
+    "Doctor/Scientist": "(-xp:20,+L:3,+I:3,[+Medi_cine:A;+Science:A;+Medicine:N,+Science:N],+Energy_Weapons:N,[+p:Educated;+p:Computer_Whizz;+p:Comprehension])",
 }
+
+
+class Stat:
+    def __init__(self, name, value):
+        self.name = name
+        self.value = value
+
+
+class StartingPackage:
+    # Compile regex
+    __xp_regex = re.compile(r"^([\x2b\x2d~])(xp):(\d+)$")
+    __trait_regex = re.compile(r"^([\x2b\x2d~])([SPECIAL]):(\d+)$")
+    __perk_regex = re.compile(r"^([\x2b\x2d~])(p):(\w+)$")
+    __skill_regex = re.compile(r"^([\x2b\x2d~])(\w+):([ANE])$")
+    __choice_group_regex = re.compile(r"\x5b([\w\x2c\x3a\x2b\x3b]+)\x5d")
+
+    def __init__(self, name, data):
+        self.name = name
+        self.data = data
+
+        self.xp = 0
+        self.traits = {}
+        self.skills = {}
+        self.perks = []
+        self.choices = {}
+
+        self.__parse_data()
+        # traits =
+
+    def __parse_data(self):
+        raw = re.sub('[()]', '', self.data)
+        # extract choices as to not interfeer with other operations as some have commas ","
+        print(raw)
+        choices = self.__choice_group_regex.findall(raw)
+        if choices is not None:
+
+            # print(choices)
+            print('choices: {0}'.format(choices))
+        parts = []
+        # parts = raw.split(',')
+
+        print(self.name)
+
+        for item in parts:
+            # print(item)
+            xp = self.__xp_regex.search(item)
+            trait = self.__trait_regex.search(item)
+            perk = self.__perk_regex.search(item)
+            skill = self.__skill_regex.search(item)
+
+            if xp is not None:
+                print(xp.groups())
+                self.xp = xp.groups()[2]
+
+            elif trait is not None:
+                print(trait.groups())
+
+            elif perk is not None:
+                print(perk.groups())
+
+            elif skill is not None:
+                print(skill.groups())
+
+            else:
+                print(item)
+
+
+    def __repr__(self):
+        return '{}: {}'.format(self.__class__.__name__,
+                               self.name,
+                               self.data)
+
+    def __str__(self):
+        return self.name
+
 
 class Perk:
     # compile some regular experssions for determining perk requirements
@@ -112,11 +195,20 @@ class Perk:
                 # print("   {0}: {1}".format(special_traits[i[0]], i[2]))
 
         return
+
 #
 # perk_list = []
 # for key, value in perks.items():
-#     perk_list.append(Perk(key, value))
+# perk_list.append(Perk(key, value))
 #
 # perk_list.sort(key=lambda perk: perk.name)
 #
 # print(perk_list)
+
+package_list = []
+for key, value in start_packages.items():
+    package_list.append(StartingPackage(key, value))
+
+# package_list.append(StartingPackage('Doctor/Scientist', start_packages['Doctor/Scientist']))
+package_list.sort(key=lambda package: package.name)
+print(package_list)
