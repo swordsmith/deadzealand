@@ -8,7 +8,22 @@
 {% endblock %}
 
 {% block content %}
-
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+<script type=text/javascript>
+  $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>
+<script type=text/javascript>
+    $(function() {
+      $( '#package' ).on('change', function() {
+      $.getJSON($SCRIPT_ROOT + '/_get_package', {
+        the_package: $('#package').val()
+      }, function( data ) {
+      $( '#package_result' ).text(data.details);
+      } );
+      return false;
+      })
+    })
+</script>
 <form class="form form-horizontal" method="post" role="form">
     {{ sheet.hidden_tag() }}
     {{ sheet.csrf_token }}
@@ -18,9 +33,21 @@
                 <div class="page-header">
                     <h1>
                         {{ sheet.character_name(placeholder='Character Name') }}<br>
-                        <small>Scrounger</small>
+                        <small>
+                            Package:
+                            <select name="start_package" id="package">
+                                {% for item in lists.packages %}
+                                <option value="{{ item }}">{{ item }} </option>
+                                <!--<option value="melee_combat">Melee Combat</option>-->
+                                <!--<option value="ranged_combat">Ranged Combat</option>-->
+                                <!--<option value="doctor/scientist">Doctor / Scientist</option>-->
+                                <!--<option value="scavenger">Scavenger</option>-->
+                                {% endfor %}
+                            </select>
+                        </small>
 
                     </h1>
+                    <span id="package_result">???</span>
                 </div>
             </div>
         </div>
