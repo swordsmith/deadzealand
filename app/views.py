@@ -1,9 +1,10 @@
 __author__ = 'Chris'
 
 from app import app
-from flask import render_template, jsonify, request
-from wtforms import IntegerField, StringField, BooleanField, validators
+from flask import render_template, jsonify, request, sessions
+from wtforms import IntegerField, StringField, BooleanField, SelectField ,validators
 from flask_wtf import Form
+import jsonpickle
 
 import deadzealand
 
@@ -20,7 +21,7 @@ class CharacterSheet(Form):
     agility = IntegerField('Agility', default=3, validators=[validators.NumberRange(min=0, max=12)])
     luck = IntegerField('Luck', default=3, validators=[validators.NumberRange(min=0, max=12)])
 
-    # package =
+    package = SelectField('Package', choices=deadzealand.package_list.keys())
 
     accept_rules = BooleanField('I accept the site rules',
                                 [validators.InputRequired()])
@@ -38,6 +39,7 @@ def index():
 
     traits['perk_list'].sort(key=lambda perk: perk.name)
     lists['packages'] = list(deadzealand.start_packages.keys())
+    # lists['skills'] = list(deadzealand.start_packages.keys())
     lists['packages'].sort()
 
     # print(perk_list)
@@ -49,12 +51,11 @@ def index():
 @app.route('/_get_package')
 def get_package_stats():
     the_package = request.args.get('the_package', 'none found', type=str)
-    print("getting package {}".format(the_package))
-    # data = "skills {}".format(the_package)
-    # data = deadzealand.package_list[the_package]
-    # details = {"skills": the_package}
-    # return render_template('_package.html', details=details)
     package_data = deadzealand.package_list[the_package]
-    print(package_data.name)
-    data = render_template('package-select-result.html', traits=package_data)
-    return jsonify(details=data)
+    data = jsonpickle.encode( package_data, unpicklable=False, max_depth=10)
+
+    # print(data)
+
+    package_html = render_template('package-select-result.html', traits=package_data)
+    # return jsonify( details=package_html )
+    return jsonify(package_html=package_html, package=data)

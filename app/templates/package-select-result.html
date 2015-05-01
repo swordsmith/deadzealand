@@ -1,1 +1,29 @@
-fruit -- {{ traits.xp }}
+<div class="package_item">
+    {% for item, value in traits.stats.items() %}
+    {{ item }}: {{ value }}{% if not loop.last %}, {% endif %}
+    {% endfor %}
+</div>
+{% if traits.static_traits|length > 0 %}
+    {% for static_trait in traits.static_traits %}
+        <div class="package_item">{{ static_trait }}</div>
+    {% endfor %}
+{% endif %}
+{% if traits.options|length > 0 %}
+    {% for choice_group in traits.options %}
+        {% set choice_loop = loop %}
+        <small>choice {{ choice_loop.index }}</small><br>
+        {% for choice_item in choice_group %}
+            {% if choice_item is string() %}
+                <label>
+                    <input type="radio" name="choice{{ choice_loop.index }}" value="{{ loop.index }}">
+                    {{ choice_item }}
+                </label><br>
+            {% else %}
+                <label>
+                    <input type="radio" name="choice{{ choice_loop.index }}" value="{{ loop.index }}">
+                    {% for item in choice_item %}{{ item }}{% if not loop.last %} and {% endif %}{% endfor %}
+                </label><br>
+            {% endif %}
+        {% endfor %}
+    {% endfor %}
+{% endif %}

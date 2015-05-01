@@ -11,6 +11,7 @@
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
 <script type=text/javascript>
   $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+
 </script>
 <script type=text/javascript>
     $(function() {
@@ -18,11 +19,27 @@
       $.getJSON($SCRIPT_ROOT + '/_get_package', {
         the_package: $('#package').val()
       }, function( data ) {
-      $( '#package_result' ).text(data.details);
+      //console.log(data);
+      $( '#package_result' ).html(data.package_html);
+      var package_data = jQuery.parseJSON( data.package );
+
+      console.log(package_data);
+
+      // modify SPECIAL stats
+      for (var key in package_data.stats) {
+        if (package_data.stats.hasOwnProperty(key)) {
+          $('#' + key.toLowerCase()).val(3 + package_data.stats[key]);
+          console.log(key.toLowerCase() + " -> " + package_data.stats[key]);
+        }
+      }
+      console.log(package_data.stats);
+
+
       } );
       return false;
       })
     })
+
 </script>
 <form class="form form-horizontal" method="post" role="form">
     {{ sheet.hidden_tag() }}
@@ -37,14 +54,11 @@
                             Package:
                             <select name="start_package" id="package">
                                 {% for item in lists.packages %}
-                                <option value="{{ item }}">{{ item }} </option>
-                                <!--<option value="melee_combat">Melee Combat</option>-->
-                                <!--<option value="ranged_combat">Ranged Combat</option>-->
-                                <!--<option value="doctor/scientist">Doctor / Scientist</option>-->
-                                <!--<option value="scavenger">Scavenger</option>-->
+                                <option value="{{ item }}">{{ item }}</option>
                                 {% endfor %}
                             </select>
                         </small>
+                        <hr>
 
                     </h1>
                     <span id="package_result">???</span>

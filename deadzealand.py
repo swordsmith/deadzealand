@@ -1,6 +1,9 @@
+import copy
+
 __author__ = 'Chris'
 
 import re
+import pprint
 
 
 symbols = {'+': 'Add',
@@ -24,54 +27,66 @@ skill_ranks = {'-': 'Unskilled',
 
 skills = {
     'Barter': [
+        ['Unskilled'],
         ['Novice 5% bonus to buying/selling items.'],
         ['Adept(C:3) 10% bonus to buying/selling items.'],
         ['Expert(C:6) 15% bonus to buying/selling. Requires at least 1 minute of rp.'], ],
     'Energy Weapons': [
+        ['Unskilled'],
         ['Novice may use stun grenade (disable robotics, stun organics)'],
         ['Adept (P:3) may use large energy weapons'],
         ['Expert (P:6) may use any automatic energy weapon'], ],
     'Guns': [
+        ['Unskilled'],
         ['Novice may use pistols'],
         ['Adept (A:3) may use any large firearm'],
         ['Expert (A:6) may use any automatic firearms'], ],
     'Explosives': [
+        ['Unskilled'],
         ['Novice may use up to 3 grenades per day'],
         ['Adept (I:3) may set 3 traps per day'],
         ['Expert (I:6) may throw an extra 3 grenades and set and extra 3 traps'], ],
     'Lock pick': [
+        ['Unskilled'],
         ['Novice-Expert allows you to unlock the corresponding locks'],
         ['Adept (A:3)'],
         ['Expert (A:6)'], ],
     'Medicine': [
+        ['Unskilled'],
         ['Novice allows you to apply bandages or splits to crippled limbs/torso, may stabalise a dying character'],
         ['Adept (I:3) may perform surgery to return one Damage Resistance per watch and may use medicine',
          'to cure poison or sickened effects'],
         ['Expert (I:6) may resuscitate a character who has been dead for up to 5 minutes.'], ],
     'Melee weapons': [
+        ['Unskilled'],
         ['Novice may use short weapons (knives, night sticks etc.)'],
         ['Adept (S:3) may use long melee weapons (swords, axe etc.)'],
         ['Expert (S:6) may use 2-handed weapons (spear or similar)'], ],
     'Repair': [
+        ['Unskilled'],
         ['Novice may jury rig using duct tape and one in five bullets are usable'],
         ['Adept (P:3) may repair damaged weapons using a tool kit and two in five bullets ',
          'recovered are usable'],
         ['Expert (P:6) may repair broken items using just duct tape and three in five bullets are usable.'], ],
     'Science': [
+        ['Unskilled'],
         ['Novice attempt to hack terminals'],
         ['Adept (I:3) may craft medical supplies'],
         ['Expert (I:6) allows you to create chems'], ],
     'Stealth': [
+        ['Unskilled'],
         ['Requires nearby cover or crowd Novice allows 1 minute of stealth'],
         ['Adept (A:3) allows 2 minutes of stealth and may pick-pocket a single item from a targeted ',
          'individual while stealthed'],
         ['Expert (A:6) allows 3 minutes and you may also pick-pocket all items from a targeted container ',
          'while stealthed. '], ],
     'Speechcraft': [
+        ['Unskilled'],
         ['Novice 5% bonus to buying/selling services'],
         ['Adept (C:3) 10% bonus to buying/selling services'],
         ['Expert (C:6) 15% bonus to buying/selling services.'], ],
     'Survival': [
+        ['Unskilled'],
         ['Novice may recover junk from scavenging and 10 bullets total'],
         ['Adept (P:3) may recover plant samples and 15 bullets total'],
         ['Expert (P:6) may recover creature organs and 20 bullets total.'], ],
@@ -104,7 +119,9 @@ perks = {
     'Lead Belly(E:8)': 'Ignores radiation from food or water sources',
     'Life Giver': '+1 DR',
     'Light Step(P:8)': 'May resist one trap effect. Trap does not activate',
-    'Living Anatomy(Medicine:A,I:6)': 'When using adept medicine,can grant one additional DR per use. Also grants an additional draw from fate bag when using resuscitation ability of Medicine expert.',
+    'Living Anatomy(Medicine:A,I:6)':
+        'When using adept medicine,can grant one additional DR per use. Also grants an additional draw from fate bag'
+        'when using resuscitation ability of Medicine expert.',
     'Math Wrath(I:6,p:Educated)': 'Grants 5% bonus to barter',
     'Merchant(Charisma:5,Barter:A)': 'Begin each weekend game with 60 caps',
     'Nerves of Steel(I:4,C:4)': 'Regain one extra critical per watch',
@@ -120,19 +137,23 @@ perks = {
     'Robotics(I:10,Science:E)': 'May touch attack unaware robots to deactivate them.',
     'Scrounger(P:5,Survival:A)': 'Gain additional ammo during downtime',
     'Silent Runner(A:5,P:4)': 'May run while using stealth',
-    'Sniper(A:7,Guns:A)': 'Extra gun crit.',
+    'Sniper(A:7,Guns:A)': 'Extra Gun critical.',
     'Splash Back(Explosives:E)': 'Grenades have 2m greater diameter',
     'Stonewall(E:10)': 'May resist knockback',
     'Strong Back(S:9)': 'Can carry and extra 2 loot sheets',
     'Strong-wall(S:10)': 'Can call knock back on a melee strike',
-    'Professional *Phys rep*(I:6,A:8,Guns:E)': 'May attach silencers to firearms,allowing ranged critical while stealthed.',
+    'Professional *Phys rep*(I:6,A:8,Guns:E)':
+        'May attach silencers to firearms,allowing ranged critical while stealthed.',
     'Toughness': '+1 DR',
     'Recycler(I:5)': 'allows you to recover energy weapon ammo.',
-    'Weapon handling *must specify weapon type*': 'May call an additional critical with a weapon of the player’s choice.',
+    'Weapon handling *must specify weapon type*':
+        'May call an additional critical with a weapon of the player’s choice.',
     'And Stay Back(A:10)': ' Can call knockback with ranged weapons',
-    'In shining armour(E:12,Phys Rep)': 'May call resist(using DR) against laser weapons when wearing shining/metal armour',
+    'In shining armour(E:12,Phys Rep)':
+        'May call resist(using DR) against laser weapons when wearing shining/metal armour',
     'Junk rounds(Repair:A)': 'Can construct bullets out of junk',
-    'Epicurean': 'You are less prone to chem addiction. May consider a bottle of alcohol a meal for the purposes of E:recovery. ',
+    'Epicurean':
+        'You are less prone to chem addiction. May consider a bottle of alcohol a meal for the purposes of E:recovery.',
     'Alertness(P:8)': 'Additional spot once per watch',
     'Certified Tech(I:7,Science:E)': 'May recover crafting components from robots',
     'Irradiated Beauty *Ghoul Specific*': 'sleep removes one rad level',
@@ -144,20 +165,56 @@ perks = {
 
 start_packages = {
     "-": "",
-    "Melee Combat": "(-xp:20,+S:3,+E:3,+Melee:A,+Stealth:N,[+p:Ninja;+p:Silent_Runner;+p:Toughness])",
-    "Ranged Combat": "(-xp:20,+P:3,+A:3,+Guns:A,+Explosives:N,[+p:Sniper;+p:Junk_Rounds;+p:Splash_Back])",
-    "Doctor/Scientist": '(-xp:20,+L:3,+I:3,[+Medicine:A;+Science:A;+Medicine:N,+Science:N],+Energy_Weapons:N,'
-                        '[+p:Educated;+p:Computer_Whizz;+p:Comprehension])',
-    "Scavenger": '(-xp:20,+C:3,+I:3,+Survival:N,[+Guns:N;+Melee:N],[+Repair:N;+Barter:N],[+p:Hunter;+p:Explorer;+p:Fortune_Finder])'
+    "Melee Combat":
+        "(-xp:20,+S:3,+E:3,+Melee:A,+Stealth:N,[+p:Ninja;+p:Silent Runner;+p:Toughness])",
+    "Ranged Combat":
+        "(-xp:20,+P:3,+A:3,+Guns:A,+Explosives:N,[+p:Sniper;+p:Junk Rounds;+p:Splash Back])",
+    "Doctor/Scientist":
+        '(-xp:20,+L:3,+I:3,[+Medicine:A;+Science:A;+Medicine:N,+Science:N],+Energy Weapons:N,[+p:Educated;'
+        '+p:Computer Whizz;+p:Comprehension])',
+    "Scavenger":
+        '(-xp:20,+C:3,+I:3,+Survival:N,[+Guns:N;+Melee:N],[+Repair:N;+Barter:N],[+p:Hunter;+p:Explorer;'
+        '+p:Fortune Finder])'
 }
+
+
+class Pc:
+    def __init__(self):
+        self.name = ''
+        self.player = ''
+        self.special = {}
+        for key, value in special_traits.items():
+            self.special[value] = 6
+
+        self.starting_package = None
+
+        self.skills = {}
+        for key, value in skill_list.items():
+            self.skills[key] = 0
+
+        self.perks = []
+        self.xp_unspent = 20
+        self.xp_total = self.xp_unspent
+
+    def add_skill(self, skill_name, value):
+        # TODO: Error check this
+        self.skills[skill_name] = value
+        # self.skills[skill_name] = value
+
+    def add_perk(self, perk_name):
+        # TODO Check is perk exists
+        if perk_name in perk_list.keys():
+            self.perks.append(perk_name)
+        else:
+            print('WARNING: {0} not found in {1}'.format(perk_name, perk_list.keys()))
 
 regex_perk_name = re.compile(r'^([\w ]+)')
 
 
 class Stat:
-    def __init__(self, name, value):
-        self.name = name
-        self.value = value
+    def __init__(self, stat_name, stat_value):
+        self.name = stat_name
+        self.value = stat_value
 
 
 class Skill:
@@ -169,6 +226,10 @@ class Skill:
         self.adept_data = self.data[1]
         self.expert_data = self.data[2]
 
+    def __str__(self):
+        thelist = [self.name, self.value]
+        return self.name
+
 
 class StartingPackage:
     # Compile regex
@@ -176,7 +237,8 @@ class StartingPackage:
     __stat_regex = re.compile(r"^([\x2b\x2d~])([SPECIAL]):(\d+)$")
     __perk_regex = re.compile(r"^([\x2b\x2d~])(p):(\w+)$")
     __skill_regex = re.compile(r"^([\x2b\x2d~])(\w+):([ANE])$")
-    __choice_group_regex = re.compile(r"(,?\x5b[\w\x2c\x3a\x2b\x3b]+\x5d)")
+    # __choice_group_regex = re.compile(r",?(?<=\x5b)(.*)(?=\x5d)")
+    __choice_group_regex = re.compile(r"(,?\x5b[\w\x2c\x3a\x2b\x3b ]+\x5d)")
     # __choice_group_regex = re.compile(r"\x5b([\w\x2c\x3a\x2b\x3b]+)\x5d")
 
     def __init__(self, name, data):
@@ -187,38 +249,43 @@ class StartingPackage:
         self.stats = {}
         self.skills = {}
         self.perks = []
-        self.choices = {}
+        self.static_traits = []
+        self.options = []
 
         self.__parse_data()
         # traits =
 
     def __parse_data(self):
-        # print('\n', self.name)
+        # print('\n{} > {}'.format(self.name, self.data))
         raw = re.sub('[()]', '', self.data)
         # extract choices as to not interfere with other operations as some have commas ","
-        # print(raw) if raw else None
+        # print('raw:',raw) if raw else None
         choices = self.__choice_group_regex.findall(raw)
+        choices_group = self.__choice_group_regex.search(raw)
+        # print(choices_group.groups()) if choices_group is not None else False
         raw = self.__choice_group_regex.sub('', raw)
         options = []
 
+        # print('choices:',choices)
         # choices = []
         if choices:
             # print('choices: {0}'.format(choices))
             for i in choices:
-                choice = []
                 # remove the square brackets
                 cleaned_choice = re.sub('[\x5d\x5b]', '', i[1:])
-                # print(cleaned_choice)
                 # a ";" means OR as in +Medicine:A;+Science:A is Medicine OR Science
                 # a "," is AND
                 items = cleaned_choice.split(';')
-                # print('options: ', items, '\n')
+                for j in items:
+                    if j.count(',') > 0:
+                        k = j.split(',')
+                        items[items.index(j)] = k
+
                 options.append(items)
-        # print(options)
-
-        parts = []
-        # parts = raw.split(',')
-
+        # print('options:', options) if len(options) > 0 else False
+        self.options = options
+        # parts = []
+        parts = raw.split(',')
 
         for item in parts:
             # print(item)
@@ -229,21 +296,27 @@ class StartingPackage:
             skill = self.__skill_regex.search(item)
 
             if xp is not None:
-                print("xp groups 111: ", xp.groups())
                 self.xp = xp.groups()[2]
 
             elif stat is not None:
-                print(stat.groups())
+                # print(stat.groups())
+                # self.static_traits.append(item[1:])
+                self.stats[special_traits[stat.groups()[1]]] = int(stat.groups()[2])
 
             elif perk is not None:
-                print(perk.groups())
+                self.static_traits.append(item[1:])
+                # self.options.append(item[1:])
+                # print('{} > adding perk {}'.format(self.name, item[1:]))
 
             elif skill is not None:
-                print(skill.groups())
+                self.static_traits.append(item[1:])
+                # self.options.append(item[1:])
+                # print('{} > adding skill {}'.format(self.name, item[1:]))
 
             else:
-                print(item)
-
+                # print(item)
+                pass
+        # pprint.pprint( self.options, compact=False)
 
     def __repr__(self):
         return '{}: {}'.format(self.__class__.__name__,
@@ -335,17 +408,16 @@ class Perk:
 
 def parse_trait(data):
     # Compile regex
-    xp_regex = re.compile(r"^([\x2b\x2d~])(xp):(\d+)$")
+    # xp_regex = re.compile(r"^([\x2b\x2d~])(xp):(\d+)$")
     stat_regex = re.compile(r"^([\x2b\x2d~])([SPECIAL]):(\d+)$")
     perk_regex = re.compile(r"^([\x2b\x2d~])(p):(\w+)$")
     skill_regex = re.compile(r"^([\x2b\x2d~])(\w+):([ANE])$")
-    choice_group_regex = re.compile(r"(,?\x5b[\w\x2c\x3a\x2b\x3b]+\x5d)")
+    # choice_group_regex = re.compile(r"(,?\x5b[\w\x2c\x3a\x2b\x3b]+\x5d)")
     trait = None
 
     skill = skill_regex.match(data)
     if skill is not None:
         trait = {skill.groups()[1]: skill.groups()[2]}
-        # trait = {skill.groups()[1]: skill.groups()[2]}
     perk = perk_regex.match(data)
     if perk is not None:
         # trait = perk.groups()[2]
@@ -362,30 +434,26 @@ perk_list = {}
 for key, value in perks.items():
     tmp = regex_perk_name.match(key)
     clean_key = tmp.groups()[0] if tmp is not None else key
+    clean_key = re.sub('(_)', " ", clean_key)
     perk_list[clean_key] = (Perk(key, value))
 
 skill_list = {}
 for key, value in skills.items():
     skill_list[key] = Skill(key, value)
-#
-# perk_list.sort(key=lambda perk: perk.name)
-#
-# print(perk_list)
-
-# package_list = []
 
 package_list = {}
 for key, value in start_packages.items():
     package_list[key] = StartingPackage(key, value)
 
-    # package_list.append(StartingPackage(key, value))
-
-# package_list.append(StartingPackage('Doctor/Scientist', start_packages['Doctor/Scientist']))
-# package_list.sort(key=lambda package: package.name)
-# print(package_list)
-
-# '(-xp:20,+C:3,+I:3,+Survival:N,[+Guns:N;+Melee:N],[+Repair:N;+Barter:N],[+p:Hunter;+p:Explorer;+p:Fortune_Finder])'
 print('---')
-# print(parse_trait('+Survival:N'))
-# print(parse_trait('+C:3'))
-# print(parse_trait('+p:Hunter'))
+
+import jsonpickle
+import json
+dog = Pc()
+dog.name = 'Dog'
+dog.player = 'James Storey'
+dog.add_skill('Barter', 2)
+dog.add_perk('Demolition Expert')
+tmp = jsonpickle.encode(dog, unpicklable=False, max_depth=10)
+parsed = json.loads(tmp)
+print(json.dumps(parsed, indent=4, sort_keys=True))
